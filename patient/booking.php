@@ -45,9 +45,17 @@
     $stmt->bind_param("s",$useremail);
     $stmt->execute();
     $result = $stmt->get_result();
-    $userfetch=$userrow->fetch_assoc();
-    $userid= $userfetch["pid"];
-    $username=$userfetch["pname"];
+
+    if ($result && $result->num_rows > 0) {
+        $userfetch = $result->fetch_assoc(); 
+        $userid = $userfetch["pid"];
+        $username = $userfetch["pname"];
+    } else {
+        echo "user not found or query failed.";
+        exit;
+    }
+    
+  
 
 
     //echo $userid;
