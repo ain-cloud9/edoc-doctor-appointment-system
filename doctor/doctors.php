@@ -163,19 +163,48 @@
                     
                 </tr>
                 <?php
-                    if($_POST){
-                        $keyword=$_POST["search"];
+                 include("../config.php"); // Make sure this connects $conn
+
+                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
+                     $keyword = trim($_POST["search"]);
+
+                     // Basic validation (e.g. length or type if needed)
+                     if (strlen($keyword) > 100) {
+                         die("Search input too long.");
+                     }
+
+                     // SQL with placeholders
+                     $sqlmain = "SELECT * FROM doctor 
+                                 WHERE docemail = ?
+                                 OR docname = ? 
+                                 OR docname LIKE ? 
+                                 OR docname LIKE ? 
+                                 OR docname LIKE ?";
+
+                     // Prepare LIKE patterns
+                     $like1 = "$keyword%";   // starts with
+                     $like2 = "%$keyword";   // ends with
+                     $like3 = "%$keyword%";  // contains
+
+                     // Prepare and bind
+                     $stmt = $conn->prepare($sqlmain);
+                     $stmt->bind_param("sssss", $keyword, $keyword, $like1, $like2, $like3);
+                     $stmt->execute();
+                     $result = $stmt->get_result();
+                  } else {
+                      // No search, just show all
+                      $sqlmain = "SELECT * FROM doctor ORDER BY docid DESC";
+                      $result = $conn->query($sqlmain);
+                  }
+
+                  // Display results or use them as needed
+                  ?>
+
+                
+
+
+
                         
-                        $sqlmain= "select * from doctor where docemail='$keyword' or docname='$keyword' or docname like '$keyword%' or docname like '%$keyword' or docname like '%$keyword%'";
-                    }else{
-                        $sqlmain= "select * from doctor order by docid desc";
-
-                    }
-
-
-
-                ?>
-                  
                 <tr>
                    <td colspan="4">
                        <center>
