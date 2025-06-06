@@ -29,7 +29,10 @@
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='d'){
             header("location: ../login.php");
         }else{
-            $useremail=$_SESSION["user"];
+            $stmt = $database->prepare("SELECT * FROM doctor WHERE docemail = ?);
+            $stmt->bind_param("s", $usermail);
+            $stmt->execute();
+            $userrow = $stmt->get_result();
         }
 
     }else{
@@ -174,17 +177,29 @@
                 
                 <?php
 
-                $sqlmain= "select schedule.scheduleid,schedule.title,doctor.docname,schedule.scheduledate,schedule.scheduletime,schedule.nop from schedule inner join doctor on schedule.docid=doctor.docid where doctor.docid=$userid ";
-                    if($_POST){
-                        //print_r($_POST);
-                        $sqlpt1="";
-                        if(!empty($_POST["sheduledate"])){
-                            $sheduledate=$_POST["sheduledate"];
-                            $sqlmain.=" and schedule.scheduledate='$sheduledate' ";
-                        }
+                if($_POST) {
+                    $sqlmain = "SELECT schedule.scheduleid, schedule.title, doctor.docname, schedule.scheduledate, schedule.scheduletime, schedule.nop
+                                FROM schedule
+                                INNER JOIN doctor ON schedule.docid = doctor.docid
+                                WHERE doctor.docid = ?";
 
+                    if (!empty($_POST["sheduledate"])) {
+                        $sheduledate = $_POST["sheduledate = ?";
+                        $sqlmain .= " AND schedule.scheduledate = ?";
                     }
 
+                    $stmt = $database->prepare($sqlmain);
+
+                    if (!empty($_POST["sheduledate"])) {
+                        $stmt->bind_param("is", $userid, $sheduledate);
+                    } else {
+                        $stmt->bind_param("i", $userid);
+                    }
+
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                }
+                        
                 ?>
                   
                 <tr>
