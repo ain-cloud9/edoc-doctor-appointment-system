@@ -174,17 +174,33 @@
                 
                 <?php
 
-                $sqlmain= "select schedule.scheduleid,schedule.title,doctor.docname,schedule.scheduledate,schedule.scheduletime,schedule.nop from schedule inner join doctor on schedule.docid=doctor.docid where doctor.docid=$userid ";
-                    if($_POST){
-                        //print_r($_POST);
-                        $sqlpt1="";
-                        if(!empty($_POST["sheduledate"])){
-                            $sheduledate=$_POST["sheduledate"];
-                            $sqlmain.=" and schedule.scheduledate='$sheduledate' ";
-                        }
+                $sqlmain = "SELECT schedule.scheduleid, schedule.title, doctor.docname, schedule.scheduledate, schedule.scheduletime, schedule.nop
+                            FROM schedule
+                            INNER JOIN doctor ON schedule.docid = doctor.docid
+                            WHERE doctor.docid = ?;
 
-                    }
+                 $params = [$userid]; // Start with user ID
+                 $types = "i";        // "i" = integer for user ID
 
+                 if ($_POST && !empty($_POST["scheduledate"])) {
+                     $schedule = $_POST["schedule"];
+                     $sqlmaain .= "AND schedule.scheduledate = ?";
+                     $params[] = $scheduledate;
+                     $types .= "s"; //"s" = string for date 
+                  }
+
+                  // Prepare and bind
+                  $stmt = $database->prepare($sqlmaain);
+                  $stmt->bind_param($types, ...$params);
+                  $stmt->execute();
+                  $result = $stmt->get_result();
+
+                  // Process results safely
+                  while ($row = $result->fetch_assoc()) {
+                      // Use $row['...']
+                  }
+                 
+        
                 ?>
                   
                 <tr>
