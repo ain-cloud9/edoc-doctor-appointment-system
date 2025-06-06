@@ -166,9 +166,16 @@
                     if($_POST){
                         $keyword=$_POST["search"];
                         
-                        $sqlmain= "select * from doctor where docemail='$keyword' or docname='$keyword' or docname like '$keyword%' or docname like '%$keyword' or docname like '%$keyword%'";
+                        $sqlmain= "SELECT * FROM doctor WHERE docname LIKE ? LIMIT 50"
+                        $stmt=$conn->prepare($sqlmain);
+
+                        $keyword="%your_search_term_here%";
+
+                        $stmt->bind_param("s", $keyword);
+                        $stmt->execute();
+                        $result=$stmt->get_result();
                     }else{
-                        $sqlmain= "select * from doctor order by docid desc";
+                        $sqlmain= "SELECT * FROM doctor ORDER BY docid DESC";
 
                     }
 
