@@ -163,8 +163,43 @@
                     
                 </tr>
                 <?php
-                    if($_POST){
+                    if($_POST) {
+                        // Get the search keyword from the form
                         $keyword=$_POST["search"];
+
+                        // Use a prepared SQL statement to avoid SQL injection
+                        $sqlmain = "SELECT * FROM doctor
+                                    WHERE docemail = ? 
+                                    OR docname = ? 
+                                    OR docname LIKE ? 
+                                    OR docname LIKE ? 
+                                    OR docname LIKE ?";
+
+                       // Create patterns for LIKE queries
+                       $like1 = "$keyword%";    // Starts with keyword
+                       $like2 = "%$keyword";    // Ends with keyword
+                       $like3 = "%$keyword%";   // Contains keyword
+                        
+                       // Prepare the SQL statement
+                       $stmt = $conn->prepare(sqlmain);
+
+                       // Bind parameters securely (all strings: "s")
+                       $stmt->bind_param("sssss", $keyword, $keyword, $like1, $like2, $like3);
+
+                       // Execute the query
+                       $stmt->execute();
+
+                       // Get the result
+                       $result=$stmt->get_result();
+
+                    } else {
+                         //If no search is submitted, just get all doctors ordered by ID descending
+                        $sqlmain="SELECT * FROM doctor ORDER BY docid DESC";
+                        $result=$conn->query($sqlmain);
+                        
+                        // Prepare the SQL statement
+                        $stmt = $conn->prepare($sqlmain);
+
                         
                         $sqlmain= "select * from doctor where docemail='$keyword' or docname='$keyword' or docname like '$keyword%' or docname like '%$keyword' or docname like '%$keyword%'";
                     }else{
