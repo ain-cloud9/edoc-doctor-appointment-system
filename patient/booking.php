@@ -40,14 +40,20 @@
     //import database
     include("../connection.php");
 
-    $sqlmain= "select * from patient where pemail=?";
+    $sqlmain= "SELECT * FROM patient WHERE pemail=?";
     $stmt = $database->prepare($sqlmain);
     $stmt->bind_param("s",$useremail);
     $stmt->execute();
     $result = $stmt->get_result();
-    $userfetch=$userrow->fetch_assoc();
-    $userid= $userfetch["pid"];
-    $username=$userfetch["pname"];
+
+    if ($result && $result->num_rows > 0) {
+        $userfetch = $result->fetch_assoc();
+        $userid = $userfetch["pid"];
+        $username = $userfetch["pname"];
+    } else {
+        echo "User not found.";
+        exit();
+    }
 
 
     //echo $userid;
