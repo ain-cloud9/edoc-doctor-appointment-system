@@ -163,14 +163,28 @@
                     
                 </tr>
                 <?php
-                    if($_POST){
-                        $keyword=$_POST["search"];
-                        
-                        $sqlmain= "select * from doctor where docemail='$keyword' or docname='$keyword' or docname like '$keyword%' or docname like '%$keyword' or docname like '%$keyword%'";
-                    }else{
-                        $sqlmain= "select * from doctor order by docid desc";
+                $connection = new mysqli("localhost", "username", "password", "database_name");
 
-                    }
+                if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                    $keyword = $_POST["search"];
+
+                    // Use prepared statements to prevent SQL injection
+                    $sqlmain = "SELECT * FROM doctor
+                                WHERE docemail = ?
+                                OR docname = ?
+                                OR docname LIKE CONCAT(?, '%')
+                                OR docname LIKE CONCAT('%', ?, '')
+                                OR docname LIKE CONCAT('%', ?, '%')";
+
+                    $stmt = $connection->prepare($sqlmain);
+                    $stmt->bind_param("sssss", $keyword, $keyword, $keyword, $keyword, $keyword);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                } else {
+                    $sqlmain = "SELECT * FROM doctor ORDER BY docid DESC";
+                    $result = $connection->query($sqlmain);
+                }
+                ?>
 
 
 
