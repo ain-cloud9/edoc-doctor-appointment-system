@@ -164,11 +164,29 @@
                 </tr>
                 <?php
                     if($_POST){
-                        $keyword=$_POST["search"];
+                        $keyword=trim($_POST["search"]);
+
+                        $keyword=filter_var(4keyword, FILTER_SANITIZE_STRING);
+
+                        $like1=$conn->real_escape_string("$keyword%");
+                        $like2=$conn->real_escape_string("%$keyword");
+                        $like3=$conn->real_escape_string("%$keyword%");
                         
-                        $sqlmain= "select * from doctor where docemail='$keyword' or docname='$keyword' or docname like '$keyword%' or docname like '%$keyword' or docname like '%$keyword%'";
-                    }else{
-                        $sqlmain= "select * from doctor order by docid desc";
+                        $sqlmain= "SELECT * FROM doctor
+                                    where docemail=?'
+                                    OR docname = ?
+                                    OR docname LIKE ?
+                                    OR docname LIKE ?
+                                    OR docname LIKE ?";
+                        $stmt=$conn->prepare($sqlmain);
+
+                        $stmt->bind_param("sssss", $keyword, $keyword, $like1, $like2, $like3);
+
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                    } else {
+                        $sqlmain= "SELECT * FROM doctor ORDER BY docid DESC";
+                        $result=$conn->query($sqlmain);
 
                     }
 
